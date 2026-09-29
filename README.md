@@ -17,41 +17,9 @@ It is trained with a composite loss (MSE + temporal correlation + spatial correl
 
 ## Architecture
 
-```mermaid
-flowchart TB
-    X["<b>Raw EEG window</b><br/>(B, C, T) · C channels × 16 s"]
-
-    subgraph FE["① Spectral front-end (select one)"]
-        direction LR
-        MSSE["<b>MSSE</b><br/>multi-scale STFT magnitude<br/>n_fft = 0.5 s / 1 s / 2 s<br/>Linear(freq→D) · Linear(frames→N)<br/>summed over scales"]
-        CWT["<b>Morlet CWT</b><br/>constant-Q filterbank, 24 bands, 1–45 Hz<br/>power pooled onto N tokens<br/>Linear(bands→D)"]
-    end
-
-    EMB["+ learnable channel embedding<br/>+ sinusoidal temporal encoding<br/><b>(B, C, N, D)</b>"]
-
-    subgraph ENC["② Transformer encoder × depth"]
-        direction TB
-        T1["flatten → C·N tokens"]
-        T2["LayerNorm → Multi-head self-attention → residual"]
-        T3["LayerNorm → MLP (GELU) → residual"]
-        T1 --> T2 --> T3
-    end
-
-    subgraph RO["③ Leadfield + FIR readout (one filter per ROI p)"]
-        direction LR
-        LF["<b>Scalp topography</b> w_p ∈ ℝ^C<br/>init: electrode→ROI<br/>leadfield proximity prior"]
-        FIR["<b>FIR HRF kernel</b> h_p ∈ ℝ^N<br/>init: canonical<br/>double-gamma HRF"]
-        K["<b>Separable spatio-temporal filter</b><br/>k_p(c, n) = w_p(c) · h_p(n)"]
-        LF --> K
-        FIR --> K
-    end
-
-    POOL["z_p = Σ_c Σ_n k_p(c, n) · Z[c, n, :]<br/><b>(B, P, D)</b>"]
-    HEAD["④ Per-ROI regression heads<br/>ŷ_p = ⟨a_p, LN(z_p)⟩ + b_p"]
-    Y["<b>Predicted BOLD</b><br/>(B, P) ROIs"]
-
-    X --> FE --> EMB --> ENC -->|"Z: (B, C·N, D)"| RO --> POOL --> HEAD --> Y
-```
+<p align="center">
+  <img src="docs/architecture.png" alt="eeg2bold architecture" width="720">
+</p>
 
 ### Tensor shapes (defaults)
 
@@ -143,6 +111,7 @@ eeg2bold/
 └── data.py        # windowing, contiguous batching, subject split, toy data
 train.py           # training + evaluation CLI
 tests/             # shape / gradient / metric sanity tests
+docs/              # architecture diagram (make_diagram.py regenerates it)
 ```
 
 ## Installation
