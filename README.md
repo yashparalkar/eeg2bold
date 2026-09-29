@@ -18,7 +18,7 @@ It is trained with a composite loss (MSE + temporal correlation + spatial correl
 ## Architecture
 
 <p align="center">
-  <img src="docs/architecture.png" alt="eeg2bold architecture" width="720">
+  <img src="docs/architecture.png" alt="eeg2bold architecture" width="900">
 </p>
 
 ### Tensor shapes (defaults)
@@ -111,7 +111,7 @@ eeg2bold/
 └── data.py        # windowing, contiguous batching, subject split, toy data
 train.py           # training + evaluation CLI
 tests/             # shape / gradient / metric sanity tests
-docs/              # architecture diagram (make_diagram.py regenerates it)
+docs/              # architecture diagram
 ```
 
 ## Installation
